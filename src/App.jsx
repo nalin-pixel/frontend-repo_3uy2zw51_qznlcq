@@ -1,5 +1,5 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useMemo } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Spline from '@splinetool/react-spline'
 import { ArrowRight, HeartHandshake, Rocket, Globe2, Users, Sparkles, ChevronRight } from 'lucide-react'
 
@@ -11,6 +11,42 @@ const container = {
 const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12 } },
+}
+
+function ProgressRail() {
+  const sections = [
+    { id: '#home', label: 'Accueil' },
+    { id: '#about', label: 'À propos' },
+    { id: '#programs', label: 'Programmes' },
+    { id: '#impact', label: 'Impact' },
+    { id: '#partners', label: 'Partenaires' },
+    { id: '#news', label: 'Actualités' },
+    { id: '#contact', label: 'Contact' },
+  ]
+
+  const go = (e, href) => {
+    e.preventDefault()
+    const el = document.querySelector(href)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  return (
+    <div className="pointer-events-none fixed right-5 top-1/2 -translate-y-1/2 z-40 hidden sm:block">
+      <div className="flex flex-col items-center gap-3">
+        {sections.map((s) => (
+          <a
+            key={s.id}
+            href={s.id}
+            onClick={(e)=>go(e,s.id)}
+            className="pointer-events-auto group"
+            aria-label={s.label}
+          >
+            <span className="block h-2.5 w-2.5 rounded-full bg-white/40 group-hover:bg-white transition-colors shadow-[0_0_12px_rgba(255,255,255,0.3)]" />
+          </a>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function Nav() {
@@ -60,20 +96,31 @@ function Nav() {
   )
 }
 
+function AmbientLayer({ colors = 'from-indigo-600/20 via-purple-600/20 to-transparent', opacity = 0.6 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity }}
+      viewport={{ amount: 0.5, once: false }}
+      transition={{ duration: 0.8 }}
+      className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${colors} blur-3xl`} />
+  )
+}
+
 function Hero() {
   return (
-    <section id="home" className="relative h-[100dvh] overflow-hidden">
+    <section id="home" className="relative min-h-[100dvh] snap-start flex items-stretch overflow-hidden">
       <div className="absolute inset-0">
         <Spline scene="https://prod.spline.design/Ao-qpnKUMOxV2eTA/scene.splinecode" style={{ width: '100%', height: '100%' }} />
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/90 pointer-events-none" />
+      <AmbientLayer colors="from-black/60 via-black/50 to-black/90" opacity={1} />
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-indigo-600/20 blur-3xl" />
       </div>
 
-      <div className="relative h-full flex items-center">
+      <div className="relative flex-1 flex items-center">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <motion.div variants={stagger} initial="hidden" animate="show" className="max-w-3xl">
             <motion.p variants={container} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/80 text-sm border border-white/10 backdrop-blur">
@@ -120,9 +167,10 @@ function About() {
   ]
 
   return (
-    <section id="about" className="relative py-28 bg-[radial-gradient(1000px_600px_at_10%_-20%,rgba(120,119,198,0.12),transparent),radial-gradient(800px_500px_at_100%_20%,rgba(56,189,248,0.08),transparent)]">
+    <section id="about" className="relative min-h-[100dvh] snap-start flex items-center py-28 bg-[radial-gradient(1000px_600px_at_10%_-20%,rgba(120,119,198,0.12),transparent),radial-gradient(800px_500px_at_100%_20%,rgba(56,189,248,0.08),transparent)]">
+      <AmbientLayer colors="from-purple-500/10 via-sky-500/10 to-transparent" opacity={0.6} />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
+        <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: false, amount: 0.2 }}>
           <p className="text-sm uppercase tracking-widest text-white/60">Qui sommes-nous ?</p>
           <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Un moteur d'impact positif</h2>
           <p className="mt-4 text-white/70 max-w-2xl">SNK Foundation conçoit des programmes concrets pour répondre aux défis sociaux avec exigence, humanité et innovation.</p>
@@ -135,7 +183,7 @@ function About() {
               variants={container}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.2 }}
               className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl hover:border-white/20 transition-all"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-white/10 to-transparent" />
@@ -175,9 +223,10 @@ function Programs() {
   ]
 
   return (
-    <section id="programs" className="relative py-28">
+    <section id="programs" className="relative min-h-[100dvh] snap-start flex items-center py-28">
+      <AmbientLayer colors="from-emerald-500/10 via-cyan-500/10 to-transparent" opacity={0.6} />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
+        <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: false, amount: 0.2 }}>
           <p className="text-sm uppercase tracking-widest text-white/60">Nos axes</p>
           <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Des programmes concrets</h2>
           <p className="mt-4 text-white/70 max-w-2xl">Chaque programme est pensé avec le terrain, mesurable et orienté résultats.</p>
@@ -190,7 +239,7 @@ function Programs() {
               variants={container}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
+              viewport={{ once: false, amount: 0.3 }}
               transition={{ duration: 0.5, delay: i * 0.05 }}
               className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-6 backdrop-blur-xl"
             >
@@ -218,8 +267,9 @@ function Impact() {
     { label: 'Pays couverts', value: '6' },
   ]
   return (
-    <section id="impact" className="relative py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="impact" className="relative min-h-[100dvh] snap-start flex items-center py-24">
+      <AmbientLayer colors="from-fuchsia-500/10 via-indigo-500/10 to-transparent" opacity={0.6} />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <div className="rounded-3xl border border-white/10 bg-white/5 p-8 md:p-12 backdrop-blur-xl overflow-hidden">
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
             <div className="absolute -top-24 right-10 h-72 w-72 rounded-full bg-purple-600/10 blur-3xl" />
@@ -227,7 +277,7 @@ function Impact() {
           </div>
           <div className="relative grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
+              <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false }} transition={{ delay: i * 0.05 }}>
                 <p className="text-4xl font-semibold">{s.value}</p>
                 <p className="text-white/70 mt-1">{s.label}</p>
               </motion.div>
@@ -248,12 +298,13 @@ function Partners() {
   ]
 
   return (
-    <section id="partners" className="relative py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="partners" className="relative min-h-[100dvh] snap-start flex items-center py-24">
+      <AmbientLayer colors="from-sky-500/10 via-cyan-500/10 to-transparent" opacity={0.6} />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <h2 className="text-2xl sm:text-3xl font-semibold">Ils nous font confiance</h2>
         <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-8 items-center">
           {logos.map((src, i) => (
-            <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+            <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: false }}>
               <img src={src} alt="logo partenaire" className="h-10 sm:h-12 w-auto mx-auto opacity-70 hover:opacity-100 transition-opacity" />
             </motion.div>
           ))}
@@ -278,12 +329,13 @@ function News() {
   ]
 
   return (
-    <section id="news" className="relative py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="news" className="relative min-h-[100dvh] snap-start flex items-center py-24">
+      <AmbientLayer colors="from-rose-500/10 via-amber-500/10 to-transparent" opacity={0.6} />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <h2 className="text-2xl sm:text-3xl font-semibold">Actualités</h2>
         <div className="mt-10 grid md:grid-cols-2 gap-6">
           {items.map((n, i) => (
-            <motion.article key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
+            <motion.article key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false }} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
               <div className="aspect-[16/9] overflow-hidden">
                 <img src={n.img} alt="actualité" className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-500" />
               </div>
@@ -304,8 +356,9 @@ function News() {
 
 function Contact() {
   return (
-    <section id="contact" className="relative py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="relative min-h-[100dvh] snap-start flex items-center py-28">
+      <AmbientLayer colors="from-white/0 via-white/0 to-white/0" opacity={0.4} />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid lg:grid-cols-2 gap-10">
           <div>
             <h2 className="text-3xl sm:text-4xl font-semibold">Rejoignez l'aventure</h2>
@@ -347,7 +400,7 @@ function Contact() {
 
 function Footer() {
   return (
-    <footer className="relative border-t border-white/10 py-10">
+    <footer className="relative border-t border-white/10 py-10 snap-start">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <img src="https://images.unsplash.com/photo-1690683789978-3cf73960d650?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxTTkslMjBGb3VuZGF0aW9ufGVufDB8MHx8fDE3NjMxMDk0MzR8MA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80" alt="SNK Foundation" className="h-8 w-8 rounded-lg object-contain" />
@@ -363,14 +416,17 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Nav />
-      <Hero />
-      <About />
-      <Programs />
-      <Impact />
-      <Partners />
-      <News />
-      <Contact />
-      <Footer />
+      <ProgressRail />
+      <div className="h-[100dvh] overflow-y-auto snap-y snap-mandatory">
+        <Hero />
+        <About />
+        <Programs />
+        <Impact />
+        <Partners />
+        <News />
+        <Contact />
+        <Footer />
+      </div>
     </div>
   )
 }
